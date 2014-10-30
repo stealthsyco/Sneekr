@@ -12,6 +12,10 @@ import android.webkit.WebViewClient;
 public class WebActivity extends Activity {
 
     private String uriString;
+    private String serverString;
+    private String server;
+    private int port;
+    private String[] parts;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -21,11 +25,28 @@ public class WebActivity extends Activity {
         Bundle bundle = getIntent().getExtras();
         uriString = bundle.getString("text_label");
         Log.d("WebActivity", uriString);
+        serverString = bundle.getString("port_label");
+        Log.d("Server and Port", serverString);
+
+        parts = serverString.split("\\:");
+        server = parts[0];
+        port = Integer.parseInt(parts[1]);
+
+        Log.d("Server", server);
+        Log.d("Port", "port: " + port);
+
+        //set proxy
+        ProxySettings proxy = new ProxySettings();
+        proxy.setProxy(this, server, port);
 
         WebView myWebView = (WebView) findViewById(R.id.webView1);
         myWebView.setWebViewClient(new WebViewClient());
         myWebView.getSettings().setJavaScriptEnabled(true);
-        myWebView.loadUrl(uriString);
+        if(uriString.isEmpty()){
+            myWebView.loadUrl("http://www.whatismyipaddress.com");
+        } else {
+            myWebView.loadUrl(uriString);
+        }
     }
 
 

@@ -18,6 +18,8 @@ public class MainActivity extends Activity {
     private RelativeLayout mLayout;
     private EditText mEditText;
     private ToggleButton mButton;
+    private EditText toggleText;
+    private TextView textView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,32 +28,49 @@ public class MainActivity extends Activity {
 
         mLayout = (RelativeLayout) findViewById(R.id.mainPage);
         mEditText = (EditText) findViewById(R.id.editText);
+
+        //toggleText = (EditText) findViewById(R.id.toggleText);
+
         mButton = (ToggleButton) findViewById(R.id.toggle);
         mButton.setOnClickListener(onClick());
-        TextView textView = new TextView(this);
-        textView.setText("New text");
+        //TextView textView = new TextView(this);
+        //textView.setText("New text");
 
 
     }
+
 
     private View.OnClickListener onClick(){
         return new View.OnClickListener() {
 
             @Override
             public void onClick(View v){
-                mLayout.addView(createNewTextView(mEditText.getText().toString()));
+                if(mButton.isChecked()) {
+                    mLayout.addView(createNewTextView(mEditText.getText().toString()));
+                    mLayout.addView(createNewEditText());
+                } else {
+
+                    mLayout.removeView(textView);
+                    mLayout.removeView(mEditText);
+                }
             }
         };
     }
 
     private TextView createNewTextView(String text){
         final LayoutParams lparams = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-        final TextView textView = new TextView(this);
+        textView = new TextView(this);
         textView.setLayoutParams(lparams);
         textView.setText("New text: " + text);
         return textView;
     }
 
+    private EditText createNewEditText(){
+        final LayoutParams lparams = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+        mEditText = new EditText(this);
+        mEditText.setLayoutParams(lparams);
+        return mEditText;
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -74,12 +93,20 @@ public class MainActivity extends Activity {
 
     public void sendMessage(View view){
 
+        String server;
+
         EditText et = (EditText) findViewById(R.id.editText);
         String theText = et.getText().toString();
         Intent intent = new Intent(MainActivity.this, WebActivity.class);
         intent.putExtra("text_label", theText);
-        //startActivity(textIntent);
 
+        if(mButton.isChecked()) {
+            server = mEditText.getText().toString();
+        } else {
+            server = "199.200.120.36:3127";
+        }
+
+        intent.putExtra("port_label", server);
         startActivity(intent);
     }
 
