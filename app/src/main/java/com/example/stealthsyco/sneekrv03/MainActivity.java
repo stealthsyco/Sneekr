@@ -1,5 +1,7 @@
 package com.example.stealthsyco.sneekrv03;
 
+// Author - Kenneth Smith
+
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
