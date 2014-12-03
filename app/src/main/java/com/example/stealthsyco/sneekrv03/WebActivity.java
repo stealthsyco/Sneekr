@@ -3,6 +3,7 @@ package com.example.stealthsyco.sneekrv03;
 // Author: Kenneth Smith
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -49,6 +50,14 @@ public class WebActivity extends Activity {
         } else {
             myWebView.loadUrl(uriString);
         }
+    }
+
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        Intent intent = new Intent(WebActivity.this, MainActivity.class);
+        startActivity(intent);
     }
 
 
