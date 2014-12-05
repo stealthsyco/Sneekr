@@ -2,33 +2,24 @@ package com.example.stealthsyco.sneekrv03;
 
 // Author - Kenneth Smith
 
-import android.app.Activity;
+
 import android.app.AlertDialog;
-import android.app.Dialog;
-import android.app.Fragment;
 import android.app.ListActivity;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.EditText;
-
 import android.widget.ListAdapter;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
 import android.widget.SimpleAdapter;
-import android.widget.TextView;
-import android.widget.ToggleButton;
-import android.widget.LinearLayout.LayoutParams;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -36,26 +27,15 @@ import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 
 
 public class MainActivity extends ListActivity {
-
-    //Variables for the layout
-    private RelativeLayout mLayout;
-    private EditText mEditText;
-    private ToggleButton mButton;
-    private EditText toggleText;
-    private TextView textView;
-
-    final Context context = this;
 
     // String to hold proxy numbers
     private String info;
@@ -72,6 +52,9 @@ public class MainActivity extends ListActivity {
     // Tag for use later
     private static final String TAG_INFO = "info";
 
+    int onResumeCount = 0;
+    String url = "http://68.63.210.188/androidConnect/getProxies.php";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -81,9 +64,11 @@ public class MainActivity extends ListActivity {
         info = null;
         // Initialize the ArrayList
         serverList = new ArrayList<HashMap<String, String>>();
+        adapter = null;
 
         // Call new background process
-        new FetchData().execute();
+        FetchData create = new FetchData();
+        create.execute();
 
         // When an item is clicked, save the data into the variable info for later,,,
         ListView lv = getListView();
@@ -95,29 +80,12 @@ public class MainActivity extends ListActivity {
             }
 
         });
-        //TextView textView = (TextView) findViewById(R.id.info);
-        //textView.setText("Hello. I'm a header view");
-        //lv.addHeaderView(textView);
-
-        //mLayout = (RelativeLayout) findViewById(R.id.mainPage);
-        //mEditText = (EditText) findViewById(R.id.editText);
-
-        //toggleText = (EditText) findViewById(R.id.toggleText);
-
-        //mButton = (ToggleButton) findViewById(R.id.toggle);
-        //mButton.setOnClickListener(onClick());
-        //TextView textView = new TextView(this);
-        //textView.setText("New text");
-
 
     }
 
     @Override
     protected void onResume(){
         super.onResume();
-        setListAdapter(adapter);
-
-
 
     }
 
@@ -138,6 +106,9 @@ public class MainActivity extends ListActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         if (id == R.id.action_settings) {
+            Intent intent = getIntent();
+            finish();
+            startActivity(intent);
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -176,6 +147,7 @@ public class MainActivity extends ListActivity {
             Intent intent = new Intent(MainActivity.this, WebActivity.class);
             intent.putExtra("text_label", webAddress);
             intent.putExtra("port_label", server);
+            intent.putExtra("onResumeCount", onResumeCount);
 
             startActivity(intent);
         }
@@ -186,27 +158,32 @@ public class MainActivity extends ListActivity {
 
     class FetchData extends AsyncTask<ArrayList<String>, ArrayList<String>, ArrayList<String>> {
         protected void onPreExecute(){
+            super.onPreExecute();
+            pDialog = new ProgressDialog(MainActivity.this);
+            pDialog.setMessage("Loading proxies. Please wait...");
+            pDialog.setIndeterminate(false);
+            pDialog.setCancelable(false);
+            pDialog.show();
             //setup stuff here...
         }
 
         @Override
         protected ArrayList<String> doInBackground(ArrayList<String>... strings) {
-            InputStream inputStream = null;
-            String result = "";
             ArrayList<String> items = new ArrayList<String>();
 
             try {
 
-                URL conURL = new URL("http://10.0.0.29/androidConnect/getProxies.php");
+                URL conURL = new URL(url);
                 HttpURLConnection urlConnection = (HttpURLConnection) conURL.openConnection();
                 urlConnection.setRequestMethod("GET");
                 //urlConnection.setRequestProperty("Content-length", "0");
                 urlConnection.setUseCaches(false);
                 urlConnection.setAllowUserInteraction(false);
-                urlConnection.setConnectTimeout(10000);
-                urlConnection.setReadTimeout(10000);
+                urlConnection.setConnectTimeout(25000);
+                urlConnection.setReadTimeout(25000);
                 urlConnection.connect();
                 int status = urlConnection.getResponseCode();
+                System.out.println(status);
                 switch (status){
                     case 200:
                     case 201:
@@ -217,17 +194,13 @@ public class MainActivity extends ListActivity {
                             Log.d("MyActivity", "First Loop Going...");
                             JSONObject ja = new JSONObject(next);
                             JSONArray servers = ja.getJSONArray("Servers");
-
+                            urlConnection.disconnect();
                             Log.d("MyActivity", "It made it here");
                             for (int i = 0; i < servers.length(); i++) {
 
                                 Log.d("MyActivity", "Second loop going...");
-                                //JSONObject jo = (JSONObject) servers.get(i);
-                                //JSONObject jo = (JSONObject) ja.get(i);
-                                //items.add(jo.getString("info"));
 
                                 JSONObject c = servers.getJSONObject(i);
-
                                 String info = c.getString(TAG_INFO);
 
                                 //Create new HashMap
@@ -244,7 +217,6 @@ public class MainActivity extends ListActivity {
 
                 }
 
-                urlConnection.disconnect();
 
             } catch (MalformedURLException e) {
                 e.printStackTrace();
@@ -265,6 +237,8 @@ public class MainActivity extends ListActivity {
         }
 
         protected void onPostExecute(ArrayList<String> result){
+
+            pDialog.dismiss();
 
             runOnUiThread(new Runnable() {
                 public void run() {
