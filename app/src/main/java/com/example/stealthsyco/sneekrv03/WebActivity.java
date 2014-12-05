@@ -44,11 +44,12 @@ public class WebActivity extends Activity {
 
         WebView myWebView = (WebView) findViewById(R.id.webView1);
         myWebView.setWebViewClient(new WebViewClient());
+        myWebView.setWebViewClient(new WebViewClient());
         myWebView.getSettings().setJavaScriptEnabled(true);
         if(uriString.isEmpty()){
             myWebView.loadUrl("http://www.whatismyipaddress.com");
         } else {
-            myWebView.loadUrl(uriString);
+            myWebView.loadUrl("http://" + uriString);
         }
     }
 

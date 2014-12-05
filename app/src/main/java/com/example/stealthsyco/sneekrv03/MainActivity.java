@@ -16,6 +16,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -65,6 +66,9 @@ public class MainActivity extends ListActivity {
     // ArrayList to hold the servers before implementing them into the ListView
     ArrayList<HashMap<String, String>> serverList;
 
+    // ListAdapter for onResume() and onPostExecute()
+    ListAdapter adapter;
+
     // Tag for use later
     private static final String TAG_INFO = "info";
 
@@ -111,6 +115,7 @@ public class MainActivity extends ListActivity {
     @Override
     protected void onResume(){
         super.onResume();
+        setListAdapter(adapter);
 
 
 
@@ -119,8 +124,11 @@ public class MainActivity extends ListActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
-        return true;
+        //getMenuInflater().inflate(R.menu.main, menu);
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main, menu);
+
+        return super.onCreateOptionsMenu(menu);
     }
 
     @Override
@@ -262,7 +270,7 @@ public class MainActivity extends ListActivity {
                 public void run() {
 
                     Log.d("Main", "Does this happen?");
-                    ListAdapter adapter = new SimpleAdapter(MainActivity.this, serverList, R.layout.list_item, new String[] { TAG_INFO, TAG_INFO }, new int[] { R.id.info, R.id.info } );
+                    adapter = new SimpleAdapter(MainActivity.this, serverList, R.layout.list_item, new String[] { TAG_INFO, TAG_INFO }, new int[] { R.id.info, R.id.info } );
                     setListAdapter(adapter);
 
                 }
